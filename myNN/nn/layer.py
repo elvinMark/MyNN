@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.lib.stride_tricks import as_strided
 from myNN.util.actfun import *
 from myNN.util.conv import *
 from myNN.util.param_init import *
@@ -406,8 +407,14 @@ class MaxPool2DLayer:
         self.kernel_size = kernel_size
         
     def forward(self,x):
-        pass
-
+        N,C,H,W = x.shape
+        new_shape = (N,C,H//self.kernel_size,W//self.kernel_size,self.kernel_size,self.kernel_size)
+        (s1,s2,s3,s4) = x.strides
+        new_stride = (s1,s2,self.kernel_size*s3,self.kernel_size*s4,s3,s4)
+        x_ = as_strided(x,new_shape,new_stride).reshape((N,C,H//self.kernel_size,W//self.kernel_size,-1))
+        self.max_idx = np.argmax(x_,axis=4)
+        return np.argmax(x_,axis=4)
+    
     def backward(self,x):
         pass
 
