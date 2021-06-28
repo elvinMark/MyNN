@@ -253,7 +253,8 @@ class Conv2DLayer:
     def __call__(self,x):
         return self.forward(x)
 
-class BatchNormalization1d:
+# Batch Normalization 1D and 2D
+class BatchNormalization1D:
     def __init__(self,channels,eps=5e-4):
         self.channels = channels
         self.eps = eps
@@ -269,9 +270,9 @@ class BatchNormalization1d:
         self.cache_input = x
         N,C = x.shape
         x_ = x.transpose((1,0))
-        self.mean = x_.sum(axis=1) / M
+        self.mean = x_.sum(axis=1) / N
         self.mean = self.mean.reshape((C,1))
-        self.sigma2 = ((x_ - self.mean)**2).sum(axis=1)/ M
+        self.sigma2 = ((x_ - self.mean)**2).sum(axis=1)/ N
         self.sigma2 = self.sigma2.reshape((C,1))
         self.isigma = 1/np.sqrt(self.sigma2 + self.eps)
         self.z = (x_ - self.mean)*self.isigma
@@ -284,7 +285,7 @@ class BatchNormalization1d:
         self.cache_err = err.transpose((1,0))
         self.dgamma = (self.cache_err * self.z).sum(axis=1).reshape((C,1))
         self.dbeta = self.cache_err.sum(axis=1).reshape((C,-1))
-        tmp = (self.cache_error - self.dbeta/M - self.z * self.dgamma /M) * self.gamma * self.isigma
+        tmp = (self.cache_err - self.dbeta/N - self.z * self.dgamma /N) * self.gamma * self.isigma
         return tmp.transpose((1,0))
         
     def update(self,optim):
@@ -317,7 +318,7 @@ class BatchNormalization1d:
         return self.forward(x)
 
 
-class BatchNormalization2d:
+class BatchNormalization2D:
     def __init__(self,channels,eps=5e-4):
         self.channels = channels
         self.eps = eps
@@ -350,7 +351,7 @@ class BatchNormalization2d:
         self.cache_err = err.transpose((1,0,2,3)).reshape(C,-1)
         self.dgamma = (self.cache_err * self.z).sum(axis=1).reshape((C,1))
         self.dbeta = self.cache_err.sum(axis=1).reshape((C,-1))
-        tmp = (self.cache_error - self.dbeta/M - self.z * self.dgamma /M) * self.gamma * self.isigma
+        tmp = (self.cache_err - self.dbeta/M - self.z * self.dgamma /M) * self.gamma * self.isigma
         return tmp.reshape((C,N,H,W)).transpose((1,0,2,3))
         
     def update(self,optim):
@@ -383,7 +384,7 @@ class BatchNormalization2d:
         return self.forward(x)
 
 # Dropout Layer in progress ...
-class DropoutLayer:
+class DropoutLayer1D:
     def __init__(self,prob=0.5):
         self.prob = prob
 
