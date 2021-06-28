@@ -6,8 +6,17 @@ from myNN.util.param_init import *
 """
 Neural Network Layers' Class
 """
+
 # Linear Layer Class
 class LinearLayer:
+    """
+    Linear Layer:
+
+    it applies a linear transformation to the input: A*x + b.
+
+    Args
+    
+    """
     def __init__(self,num_in,num_out):
         std = 1/np.sqrt(num_in)
         # self.weights = std*(np.random.random([num_in,num_out]) - 0.5)
@@ -152,40 +161,6 @@ class SoftmaxLayer:
     def __call__(self,x):
         return self.forward(x)
 
-# Dropout Layer in progress ...
-class DropoutLayer:
-    def __init__(self,prob=0.5):
-        self.prob = prob
-
-    def forward(self,x):
-        pass
-
-    def backward(self,x):
-        pass
-
-    def update(self,optim):
-        pass
-
-    def __call__(self,x):
-        return self.forward(x)
-
-# Batch Normalization Layer in progress ...
-class BatchNormalization:
-    def __init__(self):
-        pass
-
-    def forward(self,x):
-        pass
-
-    def backward(self,x):
-        pass
-
-    def update(self,optim):
-        pass
-
-    def __call__(self,x):
-        return self.forward(x)
-
 
 # Convolutional Layer (2D)
 class Conv2DLayer:
@@ -275,6 +250,152 @@ class Conv2DLayer:
                 self.bv = optim.alpha * self.bv - optim.lr * gradB / (np.sqrt(self.bh) + 1e-7)
                 self.bias += self.bv
     
+    def __call__(self,x):
+        return self.forward(x)
+
+class BatchNormalization1d:
+    def __init__(self,channels,eps=5e-4):
+        self.channels = channels
+        self.eps = eps
+        self.gamma = np.ones((channels,1))
+        self.beta = np.zeros((channels,1))
+
+        self.wv = np.zeros((channels,1))
+        self.bv = np.zeros((channels,1))
+        self.wh = np.zeros((channels,1))
+        self.bh = np.zeros((channels,1))
+
+    def forward(self,x):
+        self.cache_input = x
+        N,C = x.shape
+        x_ = x.transpose((1,0))
+        self.mean = x_.sum(axis=1) / M
+        self.mean = self.mean.reshape((C,1))
+        self.sigma2 = ((x_ - self.mean)**2).sum(axis=1)/ M
+        self.sigma2 = self.sigma2.reshape((C,1))
+        self.isigma = 1/np.sqrt(self.sigma2 + self.eps)
+        self.z = (x_ - self.mean)*self.isigma
+        self.cache_output = self.z * self.gamma + self.beta
+        self.cache_output = self.cache_output.transpose((1,0))
+        return self.cache_output
+
+    def backward(self,err):
+        N,C = err.shape
+        self.cache_err = err.transpose((1,0))
+        self.dgamma = (self.cache_err * self.z).sum(axis=1).reshape((C,1))
+        self.dbeta = self.cache_err.sum(axis=1).reshape((C,-1))
+        tmp = (self.cache_error - self.dbeta/M - self.z * self.dgamma /M) * self.gamma * self.isigma
+        return tmp.transpose((1,0))
+        
+    def update(self,optim):
+        if optim.optimType == "SGD":
+            self.gamma -= optim.lr*self.dgamma
+            self.beta -= optim.lr*self.dbeta
+            
+        elif optim.optimType == "Momentum":
+            self.wv = optim.alpha*self.wv - optim.lr*self.dgamma
+            self.gamma += self.wv
+
+            self.bv = optim.alpha*self.bv - optim.lr*self.dbeta
+            self.beta += self.bv
+
+        elif optim.optimType == "AdaGrad":
+            self.wh += self.dgamma * self.dgamma
+            self.gamma -= optim.lr*self.dgamma/(np.sqrt(self.wh) + 1e-7)
+            self.bh += self.dbeta * self.dbeta
+            self.beta -= optim.lr*self.dbeta/(np.sqrt(self.bh) + 1e-7)
+            
+        elif optim.optimType == "Adam":
+            self.wh += self.dgamma * self.dgamma
+            self.wv = optim.alpha*self.wv - optim.lr*self.dgamma/(np.sqrt(self.wh) + 1e-7)
+            self.gamma += self.wv 
+            self.bh += self.dbeta * self.dbeta
+            self.bv = optim.alpha*self.bv - optim.lr*self.dbeta/(np.sqrt(self.bh) + 1e-7)
+            self.beta += self.bv
+
+    def __call__(self,x):
+        return self.forward(x)
+
+
+class BatchNormalization2d:
+    def __init__(self,channels,eps=5e-4):
+        self.channels = channels
+        self.eps = eps
+        self.gamma = np.ones((channels,1))
+        self.beta = np.zeros((channels,1))
+
+        self.wv = np.zeros((channels,1))
+        self.bv = np.zeros((channels,1))
+        self.wh = np.zeros((channels,1))
+        self.bh = np.zeros((channels,1))
+
+    def forward(self,x):
+        self.cache_input = x
+        N,C,H,W = x.shape
+        M = N*H*W
+        x_ = x.transpose((1,0,2,3)).reshape((C,-1))
+        self.mean = x_.sum(axis=1) / M
+        self.mean = self.mean.reshape((C,1))
+        self.sigma2 = ((x_ - self.mean)**2).sum(axis=1)/ M
+        self.sigma2 = self.sigma2.reshape((C,1))
+        self.isigma = 1/np.sqrt(self.sigma2 + self.eps)
+        self.z = (x_ - self.mean)*self.isigma
+        self.cache_output = self.z * self.gamma + self.beta
+        self.cache_output = self.cache_output.reshape((C,N,H,W)).transpose((1,0,2,3))
+        return self.cache_output
+
+    def backward(self,err):
+        N,C,H,W = err.shape
+        M = N*H*W
+        self.cache_err = err.transpose((1,0,2,3)).reshape(C,-1)
+        self.dgamma = (self.cache_err * self.z).sum(axis=1).reshape((C,1))
+        self.dbeta = self.cache_err.sum(axis=1).reshape((C,-1))
+        tmp = (self.cache_error - self.dbeta/M - self.z * self.dgamma /M) * self.gamma * self.isigma
+        return tmp.reshape((C,N,H,W)).transpose((1,0,2,3))
+        
+    def update(self,optim):
+        if optim.optimType == "SGD":
+            self.gamma -= optim.lr*self.dgamma
+            self.beta -= optim.lr*self.dbeta
+            
+        elif optim.optimType == "Momentum":
+            self.wv = optim.alpha*self.wv - optim.lr*self.dgamma
+            self.gamma += self.wv
+
+            self.bv = optim.alpha*self.bv - optim.lr*self.dbeta
+            self.beta += self.bv
+
+        elif optim.optimType == "AdaGrad":
+            self.wh += self.dgamma * self.dgamma
+            self.gamma -= optim.lr*self.dgamma/(np.sqrt(self.wh) + 1e-7)
+            self.bh += self.dbeta * self.dbeta
+            self.beta -= optim.lr*self.dbeta/(np.sqrt(self.bh) + 1e-7)
+            
+        elif optim.optimType == "Adam":
+            self.wh += self.dgamma * self.dgamma
+            self.wv = optim.alpha*self.wv - optim.lr*self.dgamma/(np.sqrt(self.wh) + 1e-7)
+            self.gamma += self.wv 
+            self.bh += self.dbeta * self.dbeta
+            self.bv = optim.alpha*self.bv - optim.lr*self.dbeta/(np.sqrt(self.bh) + 1e-7)
+            self.beta += self.bv
+
+    def __call__(self,x):
+        return self.forward(x)
+
+# Dropout Layer in progress ...
+class DropoutLayer:
+    def __init__(self,prob=0.5):
+        self.prob = prob
+
+    def forward(self,x):
+        pass
+
+    def backward(self,x):
+        pass
+
+    def update(self,optim):
+        pass
+
     def __call__(self,x):
         return self.forward(x)
 
