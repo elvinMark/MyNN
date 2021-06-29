@@ -70,6 +70,20 @@ class LinearLayer:
     def __call__(self,x):
         return self.forward(x)
 
+    def clear_cache(self):
+        self.cache_input = None
+        self.cache_output = None
+        self.cache_err = None
+
+    def clear_optim(self):
+        self.wv *= 0
+        self.bv *= 0
+        self.wh *= 0
+        self.bh *= 0
+
+    def clear_all_extra(self):
+        self.clear_cache()
+        self.clear_optim()
 
 # Sigmoid Layer Class
 class SigmoidLayer:
@@ -93,6 +107,18 @@ class SigmoidLayer:
     def __call__(self,x):
         return self.forward(x)
 
+    def clear_cache(self):
+        self.cache_input = None
+        self.cache_output = None
+        self.cache_err = None
+
+    def clear_optim(self):
+        pass
+
+    def clear_all_extra(self):
+        self.clear_cache()
+        self.clear_optim()
+
 # Hyperbolic Tangent Layer
 class TanhLayer:
     def __init__(self):
@@ -115,6 +141,18 @@ class TanhLayer:
     def __call__(self,x):
         return self.forward(x)
 
+    def clear_cache(self):
+        self.cache_input = None
+        self.cache_output = None
+        self.cache_err = None
+
+    def clear_optim(self):
+        pass
+
+    def clear_all_extra(self):
+        self.clear_cache()
+        self.clear_optim()
+
 # Rectified Linear unit Layer
 class ReLULayer:
     def __init__(self):
@@ -136,6 +174,18 @@ class ReLULayer:
 
     def __call__(self,x):
         return self.forward(x)
+
+    def clear_cache(self):
+        self.cache_input = None
+        self.cache_output = None
+        self.cache_err = None
+
+    def clear_optim(self):
+        pass
+
+    def clear_all_extra(self):
+        self.clear_cache()
+        self.clear_optim()
 
 # Softmax Layer (used frequently with Cross entropy loss)
 class SoftmaxLayer:
@@ -162,6 +212,16 @@ class SoftmaxLayer:
     def __call__(self,x):
         return self.forward(x)
 
+    def clear_cache(self):
+        self.cache_input = None
+        self.cache_output = None
+
+    def clear_optim(self):
+        pass
+
+    def clear_all_extra(self):
+        self.clear_cache()
+        self.clear_optim()
 
 # Convolutional Layer (2D)
 class Conv2DLayer:
@@ -254,6 +314,23 @@ class Conv2DLayer:
     def __call__(self,x):
         return self.forward(x)
 
+    def clear_cache(self):
+        self.cache_input = None
+        self.cache_output = None
+        self.cache_error = None
+        self.dilatated_error = None
+        
+    def clear_optim(self):
+        self.wv *= 0
+        self.wh *= 0
+        if not self.bias is None:
+            self.bv *= 0
+            self.bh *= 0
+
+    def clear_all_extra(self):
+        self.clear_cache()
+        self.clear_optim()
+
 # Batch Normalization 1D and 2D
 class BatchNormalization1DLayer:
     def __init__(self,channels,eps=5e-4):
@@ -318,6 +395,26 @@ class BatchNormalization1DLayer:
     def __call__(self,x):
         return self.forward(x)
 
+    def clear_cache(self):
+        self.cache_input = None
+        self.cache_output = None
+        self.cache_err = None
+        self.mean = None
+        self.sigma2 = None
+        self.isigma = None
+        self.z = None
+        self.dgamma = None
+        self.dbeta = None
+
+    def clear_optim(self):
+        self.wv *= 0
+        self.bv *= 0
+        self.wh *= 0
+        self.bh *= 0
+
+    def clear_all_extra(self):
+        self.clear_cache()
+        self.clear_optim()
 
 class BatchNormalization2DLayer:
     def __init__(self,channels,eps=5e-4):
@@ -384,6 +481,27 @@ class BatchNormalization2DLayer:
     def __call__(self,x):
         return self.forward(x)
 
+    def clear_cache(self):
+        self.cache_input = None
+        self.cache_output = None
+        self.cache_err = None
+        self.mean = None
+        self.sigma2 = None
+        self.isigma = None
+        self.z = None
+        self.dgamma = None
+        self.dbeta = None
+
+    def clear_optim(self):
+        self.wv *= 0
+        self.bv *= 0
+        self.wh *= 0
+        self.bh *= 0
+
+    def clear_all_extra(self):
+        self.clear_cache()
+        self.clear_optim()
+
 class MaxPool2DLayer:
     def __init__(self,kernel_size=2):
         self.kernel_size = kernel_size
@@ -416,7 +534,19 @@ class MaxPool2DLayer:
 
     def __call__(self,x):
         return self.forward(x)
-    
+
+    def clear_cache(self):
+        self.cache_input_shape = None
+        self.cache_new_shape = None
+        self.cache_input_strides = None
+        self.max_idx = None
+
+    def clear_optim(self):
+        pass
+
+    def clear_all_extra(self):
+        self.clear_cache()
+        self.clear_optim()
 
 # Dropout Layer in 1D and 2D
 class Dropout1DLayer:
@@ -439,6 +569,17 @@ class Dropout1DLayer:
     def __call__(self,x):
         return self.forward(x)
 
+    def clear_cache(self):
+        self.cache_input_shape = None
+        self.mask = None
+
+    def clear_optim(self):
+        pass
+
+    def clear_all_extra(self):
+        self.clear_cache()
+        self.clear_optim()
+
 class Dropout2DLayer:
     def __init__(self,prob=0.5):
         self.prob = prob
@@ -458,3 +599,14 @@ class Dropout2DLayer:
 
     def __call__(self,x):
         return self.forward(x)
+    
+    def clear_cache(self):
+        self.cache_input_shape = None
+        self.mask = None
+
+    def clear_optim(self):
+        pass
+
+    def clear_all_extra(self):
+        self.clear_cache()
+        self.clear_optim()
