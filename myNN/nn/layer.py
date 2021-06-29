@@ -384,23 +384,6 @@ class BatchNormalization2D:
     def __call__(self,x):
         return self.forward(x)
 
-# Dropout Layer in progress ...
-class DropoutLayer1D:
-    def __init__(self,prob=0.5):
-        self.prob = prob
-
-    def forward(self,x):
-        pass
-
-    def backward(self,x):
-        pass
-
-    def update(self,optim):
-        pass
-
-    def __call__(self,x):
-        return self.forward(x)
-
 class MaxPool2DLayer:
     def __init__(self,kernel_size=2):
         self.kernel_size = kernel_size
@@ -434,3 +417,44 @@ class MaxPool2DLayer:
     def __call__(self,x):
         return self.forward(x)
     
+
+# Dropout Layer in 1D and 2D
+class DropoutLayer1D:
+    def __init__(self,prob=0.5):
+        self.prob = prob
+
+    def forward(self,x):
+        self.cache_input_shape = x.shape
+        N,C = x.shape
+        self.mask = np.random.random(N*C) < self.prob
+        return (x.reshape(-1) * self.mask).reshape((N,C))
+
+    def backward(self,err):
+        N,C = self.cache_input_shape
+        return (err.reshape(-1) * self.mask).reshape((N,C))
+
+    def update(self,optim):
+        pass
+
+    def __call__(self,x):
+        return self.forward(x)
+
+class DropoutLayer2D:
+    def __init__(self,prob=0.5):
+        self.prob = prob
+
+    def forward(self,x):
+        self.cache_input_shape = x.shape
+        N,C,H,W = x.shape
+        self.mask = np.random.random(N*C*H*W) < self.prob
+        return (x.reshape(-1) * self.mask).reshape((N,C,H,W))
+
+    def backward(self,err):
+        N,C,H,W = self.cache_input_shape
+        return (err.reshape(-1) * self.mask).reshape((N,C,H,W))
+
+    def update(self,optim):
+        pass
+
+    def __call__(self,x):
+        return self.forward(x)
