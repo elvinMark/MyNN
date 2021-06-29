@@ -401,22 +401,32 @@ class DropoutLayer1D:
     def __call__(self,x):
         return self.forward(x)
 
-# Max Pooling Layer in progress ... 
 class MaxPool2DLayer:
     def __init__(self,kernel_size=2):
         self.kernel_size = kernel_size
         
     def forward(self,x):
+        self.cache_input_shape = x.shape
         N,C,H,W = x.shape
-        new_shape = (N,C,H//self.kernel_size,W//self.kernel_size,self.kernel_size,self.kernel_size)
+        self.cache_new_shape = (N,C,H//self.kernel_size,W//self.kernel_size,self.kernel_size,self.kernel_size)
+
+        self.cache_input_strides = x.strides
         (s1,s2,s3,s4) = x.strides
-        new_stride = (s1,s2,self.kernel_size*s3,self.kernel_size*s4,s3,s4)
-        x_ = as_strided(x,new_shape,new_stride).reshape((N,C,H//self.kernel_size,W//self.kernel_size,-1))
-        self.max_idx = np.argmax(x_,axis=4)
-        return np.argmax(x_,axis=4)
+        self.cache_new_stride = (s1,s2,self.kernel_size*s3,self.kernel_size*s4,s3,s4)
+        
+        x_ = as_strided(x,self.cache_new_shape,self.cache_new_stride).reshape((N,C,H//self.kernel_size,W//self.kernel_size,-1))
+        self.max_idx = np.argmax(x_,axis=4).reshape((-1))
+
+        return np.max(x_,axis=4)
     
-    def backward(self,x):
-        pass
+    def backward(self,err):
+        N,C,H,W = self.cache_input_shape
+        o = np.zeros((N,C,H,W))
+        o_ = as_strided(o,self.cache_new_shape,self.cache_new_stride)
+        o_ = o_.reshape((-1,self.kernel_size*self.kernel_size))
+        o_[np.arange(len(self.max_idx)),self.max_idx] = err.reshape((-1))
+        o_ = o_.reshape(self.cache_new_shape)
+        return o_.transpose((0,1,2,4,3,5)).reshape((N,C,H,W))
 
     def update(self,optim):
         pass
