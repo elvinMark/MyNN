@@ -4,6 +4,11 @@ from .layer import TanhLayer
 from .layer import ReLULayer
 from .layer import SoftmaxLayer
 from .layer import Conv2DLayer
+from .layer import BatchNormalization1DLayer
+from .layer import BatchNormalization2DLayer
+from .layer import MaxPool2DLayer
+from .layer import Dropout1DLayer
+from .layer import Dropout2DLayer
 
 from .loss import MSELoss
 from .loss import CrossEntropyLoss
@@ -21,6 +26,11 @@ __all__ = ["LinearLayer",
            "ReLULayer",
            "SoftmaxLayer",
            "Conv2DLayer",
+           "BatchNormalization1DLayer",
+           "BatchNormalization2DLayer",
+           "MaxPool2DLayer",
+           "Dropout1DLayer",
+           "Dropout2DLayer",
            "MSELoss",
            "CrossEntropyLoss",
            "SequentialModel",

@@ -255,7 +255,7 @@ class Conv2DLayer:
         return self.forward(x)
 
 # Batch Normalization 1D and 2D
-class BatchNormalization1D:
+class BatchNormalization1DLayer:
     def __init__(self,channels,eps=5e-4):
         self.channels = channels
         self.eps = eps
@@ -319,7 +319,7 @@ class BatchNormalization1D:
         return self.forward(x)
 
 
-class BatchNormalization2D:
+class BatchNormalization2DLayer:
     def __init__(self,channels,eps=5e-4):
         self.channels = channels
         self.eps = eps
@@ -419,7 +419,7 @@ class MaxPool2DLayer:
     
 
 # Dropout Layer in 1D and 2D
-class DropoutLayer1D:
+class Dropout1DLayer:
     def __init__(self,prob=0.5):
         self.prob = prob
 
@@ -439,7 +439,7 @@ class DropoutLayer1D:
     def __call__(self,x):
         return self.forward(x)
 
-class DropoutLayer2D:
+class Dropout2DLayer:
     def __init__(self,prob=0.5):
         self.prob = prob
 
