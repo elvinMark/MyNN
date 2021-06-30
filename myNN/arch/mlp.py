@@ -24,10 +24,6 @@ class MLPRegressor(SequentialModel):
                 self.addLayer(ReLULayer())
             prev = curr
     
-    def train(self,dataset,epochs=100,optim=SGDOptimizer()):
-        loss=MSELoss()
-        return super().train(dataset,epochs=epochs,optim=optim,loss=loss)
-
 # Simple MultiLayer Perceptron Class
 # This MLPClassifier has been designed for classification problems (so it is mainly using CrossEntropyLoss)
 class MLPClassifier(SequentialModel):
@@ -45,7 +41,3 @@ class MLPClassifier(SequentialModel):
                 self.addLayer(ReLULayer())
             prev = curr
         self.addLayer(SoftmaxLayer())
-    
-    def train(self,dataset,epochs=100,optim=SGDOptimizer()):
-        loss=CrossEntropyLoss()
-        return super().train(dataset,epochs=epochs,optim=optim,loss=loss)

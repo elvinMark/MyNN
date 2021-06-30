@@ -9,6 +9,7 @@ from myNN.nn.optim import *
 from myNN.arch.mlp import MLPClassifier
 from myNN.util.dataset import myDataset
 from myNN.util.misc import generateRandomClassifiedData
+from myNN.util.train import train_model
 
 
 if __name__ == "__main__":
@@ -23,7 +24,7 @@ if __name__ == "__main__":
 
     # Start training
     print("Training ...")
-    log_loss = nn.train(ds,epochs=1000,optim=AdamOptimizer(lr=0.1,alpha=0.5))
+    log_loss = train_model(nn,ds,epochs=1000,optim=AdamOptimizer(lr=0.1,alpha=0.5),loss=CrossEntropyLoss())
     
     print("Test")
     print(nn.forward(x))

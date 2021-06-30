@@ -10,15 +10,13 @@ Neural Network Layers' Class
 
 # Linear Layer Class
 class LinearLayer:
-    """
-    Linear Layer:
+    """Linear Layer"""
 
-    it applies a linear transformation to the input: A*x + b.
-
-    Args
-    
-    """
     def __init__(self,num_in,num_out):
+        """ constructor of Linear Layer
+        :param num_in: number of inputs
+        :param num_out: number of outputs
+        """
         std = 1/np.sqrt(num_in)
         # self.weights = std*(np.random.random([num_in,num_out]) - 0.5)
         # self.bias = std*(np.random.random([num_out]) - 0.5)
