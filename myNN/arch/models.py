@@ -56,3 +56,4 @@ class MyCNN:
         self.conv2.eval()
         self.fc1.eval()
         self.fc2.eval()
+

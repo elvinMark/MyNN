@@ -20,6 +20,10 @@ from .optim import MomentumOptimizer
 from .optim import AdaGradOptimizer
 from .optim import AdamOptimizer
 
+from .scheduler import ConstantLRScheduler
+from .scheduler import StepLRScheduler
+from .scheduler import CosineLRScheduler
+
 __all__ = ["LinearLayer",
            "SigmoidLayer",
            "TanhLayer",
@@ -37,4 +41,7 @@ __all__ = ["LinearLayer",
            "SGDOptimizer",
            "MomentumOptimizer",
            "AdaGradOptimizer",
-           "AdamOptimizer"]
+           "AdamOptimizer",
+           "ConstantLRScheduler",
+           "StepLRScheduler",
+           "CosineLRScheduler"]
