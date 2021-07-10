@@ -602,3 +602,31 @@ class Dropout2DLayer:
     def clear_all_extra(self):
         self.clear_cache()
         self.clear_optim()
+
+
+class AvgPool2DLayer:
+    def __init__(self,kernel_size):
+        self.kernel_size = kernel_size
+        
+    def forward(self,x):
+        pass
+
+    def backward(self,err):
+        pass
+
+    def update(self,optim):
+        pass
+
+    def __call__(self,x):
+        return self.forward(x)
+
+    def clear_cache(self):
+        self.cache_input_shape = None
+        self.mask = None
+
+    def clear_optim(self):
+        pass
+
+    def clear_all_extra(self):
+        self.clear_cache()
+        self.clear_optim()

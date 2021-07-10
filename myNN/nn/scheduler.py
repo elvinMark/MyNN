@@ -24,7 +24,7 @@ class StepLRScheduler:
             return self.init_val / 625
 
 class CosineLRScheduler:
-    def __init__(self,eta_max=0.1,eta_min=0,t_max=200):
+    def __init__(self,eta_max=0.1,eta_min=5e-4,t_max=200):
         self.init_val = init_val
         self.eta_max = eta_max
         self.eta_min = eta_min
