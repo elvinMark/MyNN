@@ -7,31 +7,31 @@ from myNN.nn.optim import *
 
 # Sequential Model
 class SequentialModel:
-    def __init__(self,*kargs):
+    def __init__(self, *kargs):
         self.layers = []
         for l in kargs:
             self.layers.append(l)
-    
-    def addLayer(self,layer):
+
+    def addLayer(self, layer):
         self.layers.append(layer)
 
-    def forward(self,x):
+    def forward(self, x):
         o = x
         for l in self.layers:
             o = l.forward(o)
         return o
 
-    def backward(self,x):
+    def backward(self, x):
         o = x
         for l in reversed(self.layers):
             o = l.backward(o)
         return o
-    
-    def update(self,optim):
+
+    def update(self, optim):
         for l in self.layers:
             l.update(optim)
 
-    def __call__(self,x):
+    def __call__(self, x):
         return self.forward(x)
 
     def eval(self):
